@@ -5,7 +5,13 @@ class NodoVertice:  # Para guardar la información de cada vértice y con base a
         self.nombre = nombre  # Nombre del vértice (Ej: "V1", "V2")
         self.adyacentes = LinkedList()  # Lista enlazada de vecinos
         self.siguiente = None  # Apunta al siguiente vértice en el grafo
-
+        self.estado = 0  
+        
+    def setEstado(self, estado):
+        self.estado = estado
+    
+    def estaEnEspera(self):
+        return self.estado == 0
 
 class ListaAdyacencia:
     def __init__(self):
@@ -30,6 +36,7 @@ class ListaAdyacencia:
                 return actual
             actual = actual.siguiente
         return None
+
 
     def agregar_arista(self, nombre_origen, nombre_destino, peso):
         """Agrega una arista dirigida desde origen hacia destino con un peso."""
@@ -63,3 +70,15 @@ class ListaAdyacencia:
         for _ in range(i):
             actual = actual.siguiente
         return actual
+
+    def buscar_vertice_pos(self, nombre):
+        """Busca un vértice en la lista de adyacencia."""
+        actual = self.cabeza
+        pos = 0
+        while actual:
+            if actual.nombre == nombre:
+                return pos
+            actual = actual.siguiente
+            pos += 1
+        return None
+        

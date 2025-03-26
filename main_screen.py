@@ -4,6 +4,10 @@ import math
 import random
 import time
 from listaAdyacencia import ListaAdyacencia
+from listaAdyacencia import NodoVertice
+from Piladinamica import pila
+from colalineal import ColaLineal
+from vertice import Vertice
 import heapq
 
 circulo_activo = False  
@@ -57,20 +61,102 @@ def matriz_costos():
             
     return a
 
-def suma(a : any, b : any) -> int:
-    if a == None or b == None:
-        return None
-    else:
-        return a + b
+def recorrido_anchura(event):
     
-def lt(a : any, b : any) -> bool:
-    if b is None:
-        return True
-    elif a is None:
-        return False
-    else:
-        return a < b 
+    if len(seleccion) == 0:
+        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar un nodo inicial"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+        event.page.open(alert)
+        return
+    
+    # Reiniciar estados de los vértices (iterando por índices)
+    for i in range(len(grafo)):
+        vertice = grafo.obtener_iesimo_vertice(i)
+        vertice.setEstado(0)  # Estado 0: En espera
 
+    # Marcar como visitados (estado 2) los vértices contaminados
+    for idx in vertices_contaminados:
+        vertice = grafo.obtener_iesimo_vertice(idx)
+        vertice.setEstado(2)  # Estado 2: Visitado (contaminado)
+
+    # Crear la cola para el recorrido en anchura
+    cola = ColaLineal()
+    
+    # Obtener el índice del vértice inicial de la selección
+    indice_inicial = lista_vertices.index(seleccion[0])
+    nodo_inicial = grafo.obtener_iesimo_vertice(indice_inicial)
+
+    # Iniciar el BFS: solo se encola si el nodo inicial no estaba contaminado
+    if nodo_inicial.estaEnEspera():
+        nodo_inicial.setEstado(0)  # Estado 0: En espera
+        cola.encolar(nodo_inicial)
+    else:
+        print("El vértice inicial ya está contaminado.")
+        return
+
+    #print(nodo_inicial)
+    #print(cola.imprimir_cola)
+    
+    while not cola.esta_vacio():
+        nodo_actual = cola.desencolar()
+        print(nodo_actual.estaEnEspera())
+        
+        # Si el nodo ya no está en espera (por ejemplo, si es contaminado) lo saltamos
+        if not nodo_actual.estaEnEspera():
+            continue
+
+        nodo_actual.setEstado(2)  # Marcamos como visitado
+        
+
+        # Procesamos cada vecino del nodo_actual
+        vecinos = nodo_actual.adyacentes
+        for vecino in range (vecinos.len):
+            indice, peso = nodo_actual.adyacentes.getAt(vecino) # Obtiene el indice y el peso de la arista
+            nodo = grafo.obtener_iesimo_vertice(indice) #indice vecino
+            # Solo se encola si el vecino no ha sido visitado (estado 0)
+            if nodo.estaEnEspera():
+                nodo.setEstado(0)  # Marcar como en espera
+                cola.encolar(nodo)
+
+                # Dibujar la arista entre nodo_actual y nodo en verde
+                actual=grafo.buscar_vertice_pos(nodo_actual.nombre)
+                
+                x1 = lista_vertices[actual].left + 25
+                y1 = lista_vertices[actual].top + 25
+                x2 = lista_vertices[indice].left + 25
+                y2 = lista_vertices[indice].top + 25
+                genera_arista([x1, y1], [x2, y2], "green")  # Colorear la arista en verde
+
+        # Actualizamos el lienzo para ver el recorrido visualmente
+        canvas.update()
+        time.sleep(0.5)  # Pausa para visualizar paso a paso
+
+    print("Recorrido en anchura finalizado.")
+    
+    
+"""""            
+def recorrido_profundidad(grafo):
+    stack = pila()
+    for vertice in grafo:
+        if vertice.estaEnEspera():
+            vertice.setEstado(1)
+            stack.push(vertice)
+            stack.imprimir_pila()
+            
+            
+            while not stack.estavacio():
+                vert_pila = stack.pop()
+                print(vert_pila.dato)
+                print()
+                vert_pila.setEstado(2)
+                vecinos = vert_pila.getVecinos()
+                
+                for vecino in vecinos:
+                    if vecino.estaEnEspera():
+                        vecino.setEstado(1)
+                        stack.push(vecino)
+                stack.imprimir_pila()
+
+"""
 def act_prim(event): 
     if len(seleccion) == 0:
         alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar un nodo inicial"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
@@ -157,70 +243,6 @@ def act_kruskal(event):
     texto_distancia.value = f"El peso total del MST con Kruskal es: {peso_total}"
     texto_distancia.update()
     canvas.update()
-    
-#Dijsktra  
-def dijkstra(grafo : list, reciclaje: list, vertice_inicial : int):
-    cant_vertices = len(grafo)
-    s = [vertice_inicial] #Crea un arreglo con el vértice inicial
-    d = [None] * cant_vertices #Crea un arreglo de tamaño n 
-    p = [None] * cant_vertices            
-    
-    d[s[0]] = 0       
-    w = s[0]
-    for i in range(cant_vertices - 1):
-        menor_dist = None
-        for v in range(cant_vertices):
-            #Si w está en s, revisa el siguiente vértice
-            if v in s:
-                continue
-            
-            dist = suma(d[w], grafo[w][v])
-            if menor_dist is None:
-                menor_dist = v
-            else:
-                menor_dist = v if lt(dist, d[menor_dist]) else menor_dist
-            if grafo[w][v] != None and lt(dist, d[v]):
-                p[v] = w
-                d[v] = dist
-        w = menor_dist
-        s.append(w)
-
-    aux=0
-    for nodo in reciclaje: 
-        if nodo!=vertice_inicial and lt(d[nodo],d[aux]): 
-            aux=nodo
-    indi=aux
-    while(p[indi] != None): 
-        aux=p[indi]
-        x1 = lista_vertices[aux].left + 25
-        y1 = lista_vertices[aux].top + 25
-        x2 = lista_vertices[indi].left + 25
-        y2 = lista_vertices[indi].top + 25
-        genera_arista([x1,y1],[x2,y2],ft.Colors.AMBER_200)
-        indi=aux
-
-def floyd(grafo : list):
-    cant_vertices = len(grafo)
-    a = [[None] * cant_vertices for _ in range(cant_vertices)] #Crea un arreglo de tamaño n*n
-
-    #Inicializar matriz de distancias con la de costos
-    for i in range(cant_vertices):
-        for j in range(cant_vertices):
-            a[i][j] = grafo[i][j]
-            
-
-    for i in range(cant_vertices):
-        a[i][i] = 0
-
-    for k in range(cant_vertices):
-        for i in range(cant_vertices):
-            for j in range(cant_vertices):
-                dist = suma(a[i][k], a[k][j])
-                if lt(dist, a[i][j]):  
-                    a[i][j] = dist
-
-
-    return a #Retorna la matriz de distancias
         
 def buscar_componente(v2, componentes):
     for c2 in componentes:
@@ -492,10 +514,9 @@ def screen_main(page : ft.Page):
                         contenedor, 
                         ft.Text("Ejecutar Algoritmo",color="BLACK"), 
                         ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
-                        ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim),
-                        ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e: floyd()),
-                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(matriz_costos(),[0,1],2)),
-                        texto_distancia
+                        ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
+                        ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
+                        texto_distancia,
                        
                     ]
                     
