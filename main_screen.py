@@ -11,6 +11,8 @@ mov_activo = False
 seleccion = [] 
 lista_vertices = []
 lista_aristas = []
+vertices_contaminados = []
+vertices_no_contaminados = []
 grafo = ListaAdyacencia()  # Se crea el grafo con los vértices
 
 def reiniciar():
@@ -321,12 +323,12 @@ def screen_main(page : ft.Page):
                 canvas.shapes.append(texto)
 
             canvas.update()  # Actualizar el canvas con los cambios
-
-
-                  
-
             
         print(f"Círculo colocado en las coordenadas: {x}, {y}")
+        
+         # Asignar color aleatorio al vértice
+        color_vertice = random.choice(["#0000FF", "#FFA500"])  # Azul o Naranja
+
         circulo = ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.MOVE,
             drag_interval=50,
@@ -334,7 +336,7 @@ def screen_main(page : ft.Page):
             content=ft.FilledButton(
                 text=f"V{len(lista_vertices) + 1}",
                 width=50, height=50,
-                bgcolor="blue",
+                bgcolor=color_vertice,
                 on_click=presionar_boton_vertice,
             )
         )
@@ -345,6 +347,14 @@ def screen_main(page : ft.Page):
         grafo.agregar_vertice(len(lista_vertices))  # Agregar el vértice a la lista de adyacencia        
         lista_vertices.append(circulo)
         workarea.controls.append(circulo)  # Agregar el círculo al canvas
+        
+            # Guardar el índice del vértice en la lista correspondiente
+        if color_vertice == "#FFA500":
+            vertices_contaminados.append(len(lista_vertices) - 1)
+        else:
+            vertices_no_contaminados.append(len(lista_vertices) - 1)
+
+        
         page.update()  # Actualizar la pantalla
 
     instrucciones = ft.Text(
