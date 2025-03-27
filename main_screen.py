@@ -585,7 +585,9 @@ def screen_main(page : ft.Page):
                         contenedor, 
                         ft.Text("Ejecutar Algoritmo",color="BLACK"), 
                         ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
-                        ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
+                        ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim),
+                        ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e: floyd()),
+                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(matriz_costos(),[0,1],2)),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         texto_distancia,
                        
