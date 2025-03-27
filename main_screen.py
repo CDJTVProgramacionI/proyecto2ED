@@ -1,13 +1,10 @@
 import flet as ft
 import flet.canvas as cv
-import math
 import random
 import time
 from listaAdyacencia import ListaAdyacencia
-from listaAdyacencia import NodoVertice
-from Piladinamica import pila
+#from Piladinamica import pila
 from colalineal import ColaLineal
-from vertice import Vertice
 import heapq
 
 circulo_activo = False  
@@ -92,9 +89,6 @@ def recorrido_anchura(event):
     else:
         print("El vértice inicial ya está contaminado.")
         return
-
-    #print(nodo_inicial)
-    #print(cola.imprimir_cola)
     
     while not cola.esta_vacio():
         nodo_actual = cola.desencolar()
@@ -244,7 +238,7 @@ def act_kruskal(event):
     texto_distancia.update()
     canvas.update()
     
-    def suma(a : any, b : any) -> int:
+def suma(a : any, b : any) -> int:
         if a == None or b == None:
             return None
         else:
