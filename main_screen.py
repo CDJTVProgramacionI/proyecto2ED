@@ -1,13 +1,10 @@
 import flet as ft
 import flet.canvas as cv
-import math
 import random
 import time
 from listaAdyacencia import ListaAdyacencia
-from listaAdyacencia import NodoVertice
 from Piladinamica import pila
 from colalineal import ColaLineal
-from vertice import Vertice
 import heapq
 
 circulo_activo = False  
