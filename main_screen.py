@@ -4,6 +4,7 @@ import random
 import time
 from listaAdyacencia import ListaAdyacencia
 from Piladinamica import pila
+from Piladinamica import pila
 from colalineal import ColaLineal
 import heapq
 
@@ -77,6 +78,7 @@ def recorrido_anchura(event):
     indice_inicial = lista_vertices.index(seleccion[0])
     nodo_inicial = grafo.obtener_iesimo_vertice(indice_inicial)
 
+    # Iniciar el BFS
     # Iniciar el BFS
     if nodo_inicial.estaEnEspera():
         nodo_inicial.setEstado(0)  # Estado 0: En espera
@@ -184,9 +186,8 @@ def recorrido_profundidad(event):
         canvas.update()
 
     print("Recorrido en profundidad finalizado.")
-    
 
-def act_prim(event): 
+def act_prim(event):
     if len(seleccion) == 0:
         alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar un nodo inicial"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
         event.page.open(alert)
@@ -272,6 +273,84 @@ def act_kruskal(event):
     texto_distancia.value = f"El peso total del MST con Kruskal es: {peso_total}"
     texto_distancia.update()
     canvas.update()
+        
+def suma(a : any, b : any) -> int:
+        if a == None or b == None:
+            return None
+        else:
+            return a + b
+    
+def lt(a : any, b : any) -> bool:
+    if b is None:
+        return True
+    elif a is None:
+        return False
+    else:
+        return a < b 
+#Dijsktra  
+def dijkstra(grafo : list, reciclaje: list, vertice_inicial : int):
+    cant_vertices = len(grafo)
+    s = [vertice_inicial] #Crea un arreglo con el vértice inicial
+    d = [None] * cant_vertices #Crea un arreglo de tamaño n 
+    p = [None] * cant_vertices            
+    
+    d[s[0]] = 0       
+    w = s[0]
+    for i in range(cant_vertices - 1):
+        menor_dist = None
+        for v in range(cant_vertices):
+            #Si w está en s, revisa el siguiente vértice
+            if v in s:
+                continue
+            
+            dist = suma(d[w], grafo[w][v])
+            if menor_dist is None:
+                menor_dist = v
+            else:
+                menor_dist = v if lt(dist, d[menor_dist]) else menor_dist
+            if grafo[w][v] != None and lt(dist, d[v]):
+                p[v] = w
+                d[v] = dist
+        w = menor_dist
+        s.append(w)
+
+    aux=0
+    for nodo in reciclaje: 
+        if nodo!=vertice_inicial and lt(d[nodo],d[aux]): 
+            aux=nodo
+    indi=aux
+    while(p[indi] != None): 
+        aux=p[indi]
+        x1 = lista_vertices[aux].left + 25
+        y1 = lista_vertices[aux].top + 25
+        x2 = lista_vertices[indi].left + 25
+        y2 = lista_vertices[indi].top + 25
+        genera_arista([x1,y1],[x2,y2],ft.Colors.AMBER_200)
+        indi=aux
+
+def floyd(grafo : list):
+    cant_vertices = len(grafo)
+    a = [[None] * cant_vertices for _ in range(cant_vertices)] #Crea un arreglo de tamaño n*n
+
+    #Inicializar matriz de distancias con la de costos
+    for i in range(cant_vertices):
+        for j in range(cant_vertices):
+            a[i][j] = grafo[i][j]
+            
+
+    for i in range(cant_vertices):
+        a[i][i] = 0
+
+    for k in range(cant_vertices):
+        for i in range(cant_vertices):
+            for j in range(cant_vertices):
+                dist = suma(a[i][k], a[k][j])
+                if lt(dist, a[i][j]):  
+                    a[i][j] = dist
+
+
+    return a #Retorna la matriz de distancias
+                
         
 def buscar_componente(v2, componentes):
     for c2 in componentes:
@@ -544,10 +623,10 @@ def screen_main(page : ft.Page):
                         ft.Text("Ejecutar Algoritmo",color="BLACK"), 
                         ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
                         ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
+                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(matriz_costos(),[0,1],2)),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
-                        texto_distancia,
-                       
+                        texto_distancia        
                     ]
                     
                 )
