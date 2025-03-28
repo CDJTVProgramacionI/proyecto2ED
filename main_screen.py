@@ -10,10 +10,7 @@ from colalineal import ColaLineal
 import heapq
 
 circulo_activo = False  
-mov_activo = False
 seleccion = [] 
-lista_vertices = []
-lista_aristas = []
 vertices_contaminados = []
 vertices_no_contaminados = []
 grafo = Grafo()  # Se crea el grafo con los vértices
@@ -290,18 +287,17 @@ def dijkstra(mat_pesos : list, reciclaje: list, vertice_inicial : int):
         arista = grafo.buscar_arista(v1, v2)  # Obtener la arista entre los nodos
         arista.repaint(ft.Colors.AMBER_200) # Resaltar la arista en amarillo
 
-def floyd(grafo : list):
-    cant_vertices = len(grafo)
-    a = [[None] * cant_vertices for _ in range(cant_vertices)] #Crea un arreglo de tamaño n*n
-
-    #Inicializar matriz de distancias con la de costos
+def floyd(mat : list):
+    cant_vertices = len(mat)
+    a = mat.copy() #Copia la matriz de costos
+    pre=[]
+    
     for i in range(cant_vertices):
-        for j in range(cant_vertices):
-            a[i][j] = grafo[i][j]
-            
+            pre.append([i]*cant_vertices)
 
     for i in range(cant_vertices):
         a[i][i] = 0
+        pre[i][i] = None  #La diagonal principal es nula
 
     for k in range(cant_vertices):
         for i in range(cant_vertices):
@@ -309,10 +305,9 @@ def floyd(grafo : list):
                 dist = suma(a[i][k], a[k][j])
                 if lt(dist, a[i][j]):  
                     a[i][j] = dist
+                    pre[i][j] = pre[k][j]  # Actualiza el predecesor
 
-
-    return a #Retorna la matriz de distancias
-                
+    print(pre)
         
 def buscar_componente(v2, componentes):
     for c2 in componentes:
@@ -438,9 +433,9 @@ def screen_main(page : ft.Page):
         
         # Guardar el índice del vértice en la lista correspondiente
         if contaminado:
-            vertices_contaminados.append(len(lista_vertices) - 1)
+            vertices_contaminados.append(len(grafo.vertices) - 1)
         else:
-            vertices_no_contaminados.append(len(lista_vertices) - 1)
+            vertices_no_contaminados.append(len(grafo.vertices) - 1)
 
         
         page.update()  # Actualizar la pantalla
@@ -503,6 +498,7 @@ def screen_main(page : ft.Page):
                         ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
                         ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
                         ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(grafo.matriz_costos(),[0,1],2)),
+                        ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : floyd(grafo.matriz_costos())),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
                         texto_distancia        
