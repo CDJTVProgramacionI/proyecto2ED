@@ -186,6 +186,34 @@ def recorrido_profundidad(event):
         canvas.update()
 
     print("Recorrido en profundidad finalizado.")
+    
+def determinar_bosque():
+        #Determinar si el bosque es denso o disperso
+        num_vertices = len(grafo)
+        num_aristas = len(lista_aristas)
+        #numero maximo de conexiones en un grafo completo
+        max_conexiones = num_vertices * (num_vertices - 1) // 2  # Máximo de aristas en un grafo completo
+        #numero minimo de conexiones en un grafo completo
+        min_conexiones = num_vertices - 1  # Mínimo de aristas para un árbol
+
+        #Calcular si el numero de caminos esta mas cerca del maximo o del minimo
+        if abs (num_aristas - max_conexiones) < abs(num_aristas - min_conexiones):
+            return "Denso" 
+        else:
+            return "Disperso"
+        
+def ejecutar_prim_o_kruskal(event):
+    # Determinar el tipo de bosque (denso o disperso)
+    tipo_bosque = determinar_bosque()
+    
+    if tipo_bosque == "Denso":
+        texto_distancia.value = "El bosque es denso, se ejecutará Prim."
+        texto_distancia.update()
+        act_prim(event)  # Ejecutar Prim si el bosque es denso
+    else: 
+        texto_distancia.value = "El bosque es disperso, se ejecutará kruskal."
+        texto_distancia.update()
+        act_kruskal(event)  # Ejecutar Kruskal si el bosque es disperso
 
 def act_prim(event):
     if len(seleccion) == 0:
