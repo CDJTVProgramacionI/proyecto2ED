@@ -328,14 +328,6 @@ def activar_circulos(event):
     bttn_vertice.bgcolor = ft.Colors.GREEN_ACCENT_100 if circulo_activo else ft.Colors.PINK_100
     bttn_vertice.update()  # Refrescar solo cuando se cambia el estado
 
-def activar_movimiento(event):
-     """Activa o desactiva el movimiento de los circulos al hacer clic en el botón."""
-     global mov_activo
-     mov_activo = not mov_activo
-     #Cambiar color del botón según el estado
-     bttn_moverNodo.bgcolor = ft.Colors.GREEN_ACCENT_100 if mov_activo else ft.Colors.PINK_100
-     bttn_moverNodo.update()  # Refrescar solo cuando se cambia el estado
-
 def presionar_boton_arista(e : ft.ControlEvent):
     
     #Validaciones
@@ -412,13 +404,6 @@ bttn_vertice =  ft.FilledButton(
     on_click=activar_circulos  # Alternar modo de colocación al hacer clic
 )
 
-bttn_moverNodo = ft.FilledButton(
-    width=100, height=50,
-    bgcolor=ft.Colors.PINK_100,  # Color inicial del botón
-    text="MOVER VÉRTICE",
-    on_click=activar_movimiento  # Alternar modo de colocación al hacer clic
-)
-
 def screen_main(page : ft.Page):
     
     page.title = "Visual Graph"
@@ -477,7 +462,6 @@ def screen_main(page : ft.Page):
         ft.Row(
             [
                 bttn_vertice,
-                bttn_moverNodo,
                 ft.FilledButton(
                     text="Generar Arista",
                     bgcolor=ft.Colors.BLUE_50,
