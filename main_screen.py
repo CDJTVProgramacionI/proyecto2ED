@@ -10,10 +10,7 @@ from colalineal import ColaLineal
 import heapq
 
 circulo_activo = False  
-mov_activo = False
 seleccion = [] 
-lista_vertices = []
-lista_aristas = []
 vertices_contaminados = []
 vertices_no_contaminados = []
 grafo = Grafo()  # Se crea el grafo con los vértices
@@ -106,6 +103,13 @@ def recorrido_profundidad(event):
         nodo_actual = stack.pop()
         
         # Si el nodo ya fue visitado (estado 2), lo ignoramos
+        # Paint edges of an already visited vertex
+        for vecino in range(nodo_actual.adyacentes.len):
+            nodo_vecino, _ = nodo_actual.adyacentes.getAt(vecino)
+            if nodo_vecino.estado == 2:  # If the neighbor is already visited
+                arista = grafo.buscar_arista(nodo_actual, nodo_vecino)  # Find the edge
+                arista.repaint("green")  # Paint the edge blue
+                time.sleep(0.5)  
         if nodo_actual.estado == 2:
             continue
 
@@ -202,6 +206,8 @@ def act_prim(event):
     texto_distancia.value = f"El peso total del MST con Prim es: {peso_total}"
     texto_distancia.update()
 
+
+
 def act_kruskal(event):
     peso_total= 0
     componentes = [[nodo] for nodo in grafo.vertices]  # Cada vértice es una componente
@@ -290,18 +296,17 @@ def dijkstra(mat_pesos : list, reciclaje: list, vertice_inicial : int):
         arista = grafo.buscar_arista(v1, v2)  # Obtener la arista entre los nodos
         arista.repaint(ft.Colors.AMBER_200) # Resaltar la arista en amarillo
 
-def floyd(grafo : list):
-    cant_vertices = len(grafo)
-    a = [[None] * cant_vertices for _ in range(cant_vertices)] #Crea un arreglo de tamaño n*n
-
-    #Inicializar matriz de distancias con la de costos
+def floyd(mat : list):
+    cant_vertices = len(mat)
+    a = mat.copy() #Copia la matriz de costos
+    pre=[]
+    
     for i in range(cant_vertices):
-        for j in range(cant_vertices):
-            a[i][j] = grafo[i][j]
-            
+            pre.append([i]*cant_vertices)
 
     for i in range(cant_vertices):
         a[i][i] = 0
+        pre[i][i] = None  #La diagonal principal es nula
 
     for k in range(cant_vertices):
         for i in range(cant_vertices):
@@ -309,10 +314,9 @@ def floyd(grafo : list):
                 dist = suma(a[i][k], a[k][j])
                 if lt(dist, a[i][j]):  
                     a[i][j] = dist
+                    pre[i][j] = pre[k][j]  # Actualiza el predecesor
 
-
-    return a #Retorna la matriz de distancias
-                
+    print(pre)
         
 def buscar_componente(v2, componentes):
     for c2 in componentes:
@@ -327,14 +331,6 @@ def activar_circulos(event):
     # Cambiar color del botón según el estado
     bttn_vertice.bgcolor = ft.Colors.GREEN_ACCENT_100 if circulo_activo else ft.Colors.PINK_100
     bttn_vertice.update()  # Refrescar solo cuando se cambia el estado
-
-def activar_movimiento(event):
-     """Activa o desactiva el movimiento de los circulos al hacer clic en el botón."""
-     global mov_activo
-     mov_activo = not mov_activo
-     #Cambiar color del botón según el estado
-     bttn_moverNodo.bgcolor = ft.Colors.GREEN_ACCENT_100 if mov_activo else ft.Colors.PINK_100
-     bttn_moverNodo.update()  # Refrescar solo cuando se cambia el estado
 
 def presionar_boton_arista(e : ft.ControlEvent):
     
@@ -412,13 +408,6 @@ bttn_vertice =  ft.FilledButton(
     on_click=activar_circulos  # Alternar modo de colocación al hacer clic
 )
 
-bttn_moverNodo = ft.FilledButton(
-    width=100, height=50,
-    bgcolor=ft.Colors.PINK_100,  # Color inicial del botón
-    text="MOVER VÉRTICE",
-    on_click=activar_movimiento  # Alternar modo de colocación al hacer clic
-)
-
 def screen_main(page : ft.Page):
     
     page.title = "Visual Graph"
@@ -428,7 +417,6 @@ def screen_main(page : ft.Page):
     page.window.height = 700
     page.bgcolor = ft.Colors.WHITE
     page.window.resizable = False
-
         
     def on_tap_down(event: ft.TapEvent):
         """Coloca círculos si el modo está activado y el clic no fue en el botón."""
@@ -453,9 +441,9 @@ def screen_main(page : ft.Page):
         
         # Guardar el índice del vértice en la lista correspondiente
         if contaminado:
-            vertices_contaminados.append(len(lista_vertices) - 1)
+            vertices_contaminados.append(len(grafo.vertices) - 1)
         else:
-            vertices_no_contaminados.append(len(lista_vertices) - 1)
+            vertices_no_contaminados.append(len(grafo.vertices) - 1)
 
         
         page.update()  # Actualizar la pantalla
@@ -477,7 +465,6 @@ def screen_main(page : ft.Page):
         ft.Row(
             [
                 bttn_vertice,
-                bttn_moverNodo,
                 ft.FilledButton(
                     text="Generar Arista",
                     bgcolor=ft.Colors.BLUE_50,
@@ -519,6 +506,7 @@ def screen_main(page : ft.Page):
                         ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
                         ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
                         ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(grafo.matriz_costos(),[0,1],2)),
+                        ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : floyd(grafo.matriz_costos())),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
                         texto_distancia        
@@ -532,4 +520,4 @@ def screen_main(page : ft.Page):
     )
     
 if __name__ == "__main__":
-    ft.app(screen_main)
+    ft.app(screen_main)  # Iniciar la aplicación Flet
