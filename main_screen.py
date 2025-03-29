@@ -199,6 +199,8 @@ def act_prim(event):
     texto_distancia.value = f"El peso total del MST con Prim es: {peso_total}"
     texto_distancia.update()
 
+
+
 def act_kruskal(event):
     peso_total= 0
     componentes = [[nodo] for nodo in grafo.vertices]  # Cada vértice es una componente
@@ -399,6 +401,33 @@ bttn_vertice =  ft.FilledButton(
     on_click=activar_circulos  # Alternar modo de colocación al hacer clic
 )
 
+def mostrar_certificado(page: ft.Page, nombre: str):
+    
+    def cerrar_certificado(e):
+        certificado.open = False
+        page.update()
+    
+    certificado = ft.AlertDialog(
+        modal=True,
+        content=ft.Stack([
+            ft.Image(
+                src="Imagenes/certificado.jpg",
+                fit=ft.ImageFit.COVER,
+                width=500,
+                height=300
+            ),
+            ft.Column([
+                ft.Text(nombre, size=20, color=ft.colors.WHITE, weight=ft.FontWeight.BOLD),
+                ft.ElevatedButton("Cerrar", on_click=cerrar_certificado)
+            ], alignment=ft.MainAxisAlignment.END, horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10)
+        ], width=500, height=300)
+    )
+    
+    certificado.open = True
+    page.overlay.append(certificado)
+    page.update()
+
+
 def screen_main(page : ft.Page):
     
     page.title = "Visual Graph"
@@ -408,7 +437,6 @@ def screen_main(page : ft.Page):
     page.window.height = 700
     page.bgcolor = ft.Colors.WHITE
     page.window.resizable = False
-
         
     def on_tap_down(event: ft.TapEvent):
         """Coloca círculos si el modo está activado y el clic no fue en el botón."""
@@ -512,4 +540,4 @@ def screen_main(page : ft.Page):
     )
     
 if __name__ == "__main__":
-    ft.app(screen_main)
+    ft.app(screen_main)  # Iniciar la aplicación Flet
