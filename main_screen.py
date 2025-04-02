@@ -7,6 +7,7 @@ from grafo.grafo import Grafo
 from Piladinamica import pila
 from Piladinamica import pila
 from colalineal import ColaLineal
+from archivos import guardar_grafo, cargar_grafo
 import heapq
 
 circulo_activo = False  
@@ -103,13 +104,6 @@ def recorrido_profundidad(event):
         nodo_actual = stack.pop()
         
         # Si el nodo ya fue visitado (estado 2), lo ignoramos
-        # Paint edges of an already visited vertex
-        for vecino in range(nodo_actual.adyacentes.len):
-            nodo_vecino, _ = nodo_actual.adyacentes.getAt(vecino)
-            if nodo_vecino.estado == 2:  # If the neighbor is already visited
-                arista = grafo.buscar_arista(nodo_actual, nodo_vecino)  # Find the edge
-                arista.repaint("green")  # Paint the edge blue
-                time.sleep(0.5)  
         if nodo_actual.estado == 2:
             continue
 
@@ -205,8 +199,6 @@ def act_prim(event):
     
     texto_distancia.value = f"El peso total del MST con Prim es: {peso_total}"
     texto_distancia.update()
-
-
 
 def act_kruskal(event):
     peso_total= 0
@@ -408,6 +400,27 @@ bttn_vertice =  ft.FilledButton(
     on_click=activar_circulos  # Alternar modo de colocación al hacer clic
 )
 
+def bttn_guardar(e : ft.ControlEvent):
+    """Guarda el grafo en un archivo."""
+    guardar_grafo("grafo.pkl", grafo)  # Guardar el grafo en un archivo
+    
+def bttn_cargar(e : ft.ControlEvent):
+    """Carga el grafo desde un archivo."""
+    global grafo
+    
+    grafo = cargar_grafo("grafo.pkl", workarea)  # Cargar el grafo desde un archivo
+    
+    if grafo is None:
+        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+        e.page.open(alert)
+        return
+    
+    for vertice in grafo.vertices:
+        vertice.set_on_click(presionar_boton_vertice)
+        workarea.controls.append(vertice.boton)  # Agregar el botón al área de trabajo
+    
+    workarea.update()  # Refrescar el área de trabajo
+
 def screen_main(page : ft.Page):
     
     page.title = "Visual Graph"
@@ -417,6 +430,7 @@ def screen_main(page : ft.Page):
     page.window.height = 700
     page.bgcolor = ft.Colors.WHITE
     page.window.resizable = False
+
         
     def on_tap_down(event: ft.TapEvent):
         """Coloca círculos si el modo está activado y el clic no fue en el botón."""
@@ -509,6 +523,8 @@ def screen_main(page : ft.Page):
                         ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : floyd(grafo.matriz_costos())),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
+                        ft.FilledTonalButton(text="Guardar",bgcolor=ft.Colors.INDIGO_500,on_click=bttn_guardar),
+                        ft.FilledTonalButton(text="Cargar",bgcolor=ft.Colors.INDIGO_500,on_click=bttn_cargar),
                         texto_distancia        
                     ]
                     
@@ -520,4 +536,4 @@ def screen_main(page : ft.Page):
     )
     
 if __name__ == "__main__":
-    ft.app(screen_main)  # Iniciar la aplicación Flet
+    ft.app(screen_main)
