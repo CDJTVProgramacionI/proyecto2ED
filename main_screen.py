@@ -77,7 +77,16 @@ def recorrido_anchura(event):
 
     print("Recorrido en anchura finalizado.")
     
-    
+def hexa_random (): 
+    while True:
+        #Se genera un numero random
+        num=random.randint(0,16777215)
+        hexa=hex(num)
+        hexa=hexa.replace('0x', '#')
+        
+        # Evitar colores específicos
+        if hexa not in ["#e3f2fd", "#000000"]:  # Ahora los colores tienen '#'
+            return hexa  # Devuelve el color si no está en la lista prohibida 
            
 def recorrido_profundidad(event):
     
@@ -104,6 +113,13 @@ def recorrido_profundidad(event):
         nodo_actual = stack.pop()
         
         # Si el nodo ya fue visitado (estado 2), lo ignoramos
+        # Paint edges of an already visited vertex
+        for vecino in range(nodo_actual.adyacentes.len):
+            nodo_vecino, _ = nodo_actual.adyacentes.getAt(vecino)
+            if nodo_vecino.estado == 2:  # If the neighbor is already visited
+                arista = grafo.buscar_arista(nodo_actual, nodo_vecino)  # Find the edge
+                arista.repaint("green")  # Paint the edge blue
+                time.sleep(0.5)  
         if nodo_actual.estado == 2:
             continue
 
@@ -121,7 +137,7 @@ def recorrido_profundidad(event):
                 
                 #Buscamos la arista
                 arista = grafo.buscar_arista(nodo_actual, nodo_vecino)  # Obtener la arista entre nodo_actual y nodo_vecino
-                arista.repaint("green")  # Resaltar en verde
+                arista.repaint(hexa_random())  # Resaltar en verde
                 time.sleep(0.5)  # Pausa para visualizar cada paso
 
     print("Recorrido en profundidad finalizado.")
@@ -408,10 +424,11 @@ def bttn_cargar(e : ft.ControlEvent):
     """Carga el grafo desde un archivo."""
     global grafo
     
-    grafo = cargar_grafo("grafo.pkl", workarea)  # Cargar el grafo desde un archivo
+    # Aquí se carga el grafo desde un archivo aleatorio
+    grafo = cargar_grafo(workarea)  # Cargar el grafo desde un archivo aleatorio en el directorio
     
     if grafo is None:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"), [ft.TextButton("Aceptar", on_click=lambda e: e.page.close(alert))])
         e.page.open(alert)
         return
     
@@ -476,28 +493,14 @@ def screen_main(page : ft.Page):
     contenedor=ft.Container(content=instrucciones,expand=False)
         
     page.add(
-        ft.Row(
-            [
-                bttn_vertice,
-                ft.FilledButton(
-                    text="Generar Arista",
-                    bgcolor=ft.Colors.BLUE_50,
-                    color=ft.Colors.BLUE_400,
-                    on_click=presionar_boton_arista), 
-                campo_peso,
-                ft.FilledButton(text="Reiniciar",bgcolor=ft.Colors.BLUE_50,on_click=lambda e : reiniciar()),
-                ft.IconButton(
-                    icon=ft.Icons.DELETE,
-                    icon_color=ft.Colors.RED_500,
-                    icon_size=40,
-                    tooltip="Borrar grafo",
-                    on_click=borrar
-                )
-                  
-            ]
-        ),
-        ft.Container(width=10,height=25,)
-
+    ft.Column(
+        [
+            ft.Text("¿Qué es un grafo?", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("¿Cómo se representa un grafo en programación?", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("¿Cuál es la diferencia entre un grafo dirigido y uno no dirigido?", size=20, weight=ft.FontWeight.BOLD)
+        ]
+    ),
+    ft.Container(width=10, height=25)
     )
 
     page.add(
