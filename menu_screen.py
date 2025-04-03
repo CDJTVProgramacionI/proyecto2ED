@@ -1,8 +1,12 @@
 import flet as ft
 import main_screen
 import certificado
-import screen_nombre 
+import screen_nombre
+import instrucc_screen
 import flet.canvas as cv
+
+#def main(page: ft.Page):  
+#   screen_menu(page,False,False,False,False)
 
 def screen_menu(page: ft.Page):
     page.title = "Visual Graph"
@@ -22,12 +26,8 @@ def screen_menu(page: ft.Page):
     checkbox1= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
     checkbox2= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
     checkbox3= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
-    checkbox4= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
-    checkbox5= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
-    checkbox6= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
-    checkbox7= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
+    checkbox4= ft.Checkbox(value=False, disabled=True,check_color="#697A55") 
 
-  
     def go_to_main(e): 
         page.clean()
         main_screen.screen_main(page)
@@ -35,6 +35,12 @@ def screen_menu(page: ft.Page):
     def go_to_nombre(e): 
         page.clean()
         screen_nombre.screen_nombre(page)
+
+    def go_to_instrucc(e): 
+        global cb1
+        cb1=True
+        page.clean()
+        instrucc_screen.screen_instrucciones(page)
 
     def completar_nivel(e):
         import time
@@ -56,7 +62,7 @@ def screen_menu(page: ft.Page):
                 ),
                 ft.Text(" "), 
                 ft.Row([
-                    ft.FilledButton(text="Etapa 1",  bgcolor='#CADBB7', color='#485935', width=180,height=65,on_click=go_to_main),
+                    ft.FilledButton(text="Etapa 1",  bgcolor='#CADBB7', color='#485935', width=180,height=65,on_click=go_to_instrucc),
                     checkbox1,
                 ], alignment=ft.MainAxisAlignment.CENTER), 
                 ft.Row([
@@ -92,6 +98,7 @@ def screen_menu(page: ft.Page):
         gif, 
     )
     page.update()
+    
 
 # Ejecutar la aplicación
 if __name__ == "__main__":
