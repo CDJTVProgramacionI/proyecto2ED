@@ -17,17 +17,6 @@ vertices_contaminados = []
 vertices_no_contaminados = []
 grafo = Grafo()  # Se crea el grafo con los vértices
 
-def hexa_random (): 
-    while True:
-        #Se genera un numero random
-        num=random.randint(0,16777215)
-        hexa=hex(num)
-        hexa=hexa.replace('0x', '#')
-        
-        # Evitar colores específicos
-        if hexa not in ["#e3f2fd", "#000000"]:  # Ahora los colores tienen '#'
-            return hexa  # Devuelve el color si no está en la lista prohibida
-
 def reiniciar():
     texto_distancia.value = ""
     for arista in grafo.aristas:
@@ -89,6 +78,16 @@ def recorrido_anchura(event):
 
     print("Recorrido en anchura finalizado.")
     
+def hexa_random (): 
+    while True:
+        #Se genera un numero random
+        num=random.randint(0,16777215)
+        hexa=hex(num)
+        hexa=hexa.replace('0x', '#')
+        
+        # Evitar colores específicos
+        if hexa not in ["#e3f2fd", "#000000"]:  # Ahora los colores tienen '#'
+            return hexa  # Devuelve el color si no está en la lista prohibida 
            
 def recorrido_profundidad(event):
     
@@ -309,7 +308,7 @@ def dijkstra(mat_pesos : list, reciclaje: list):
         arista.repaint(ft.Colors.AMBER_200) # Resaltar la arista en amarillo
         indi=aux
 
-#Floyd
+#Floyd 
 def floyd(mat : list):
     cant_vertices = len(mat)
     a = mat.copy() #Copia la matriz de costos
@@ -444,7 +443,7 @@ def bttn_cargar(e : ft.ControlEvent):
     vertices_contaminados.clear()  # Limpiar la lista de contaminados
     vertices_no_contaminados.clear()  # Limpiar la lista de no contaminados
     
-    grafo = cargar_grafo("grafo2", workarea)  # Cargar el grafo desde un archivo
+    grafo = cargar_grafo("grafo.pkl", workarea)  # Cargar el grafo desde un archivo
     
     if grafo is None:
         alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
@@ -461,7 +460,13 @@ def bttn_cargar(e : ft.ControlEvent):
     
     workarea.update()  # Refrescar el área de trabajo
 
-def screen_main(page : ft.Page):
+def screen_main(page : ft.Page, nivel:int):
+
+    contenedor=ft.Container(width=10,height=25,)
+
+    def go_to_menu(e): 
+        page.clean()
+        menu_screen.screen_menu(page)
     
     page.title = "Visual Graph"
     page.vertical_alignment = ft.MainAxisAlignment.END
@@ -471,11 +476,6 @@ def screen_main(page : ft.Page):
     page.bgcolor = ft.Colors.WHITE
     page.window.resizable = False
 
-    def go_to_menu(e): 
-        page.clean()
-        menu_screen.screen_menu(page)
-        
-    
     def on_tap_down(event: ft.TapEvent):
         """Coloca círculos si el modo está activado y el clic no fue en el botón."""
         if not circulo_activo:
@@ -506,42 +506,14 @@ def screen_main(page : ft.Page):
         
         page.update()  # Actualizar la pantalla
 
-    instrucciones = ft.Text(
-                    "Aqui puede diseñar su propio mapa \n"
-                    "Presione el boton vertice para agregar\n" 
-                    "una zona\n"
-                    "En la seccion generar arista puede\n" 
-                    "agregar un camino asi como \n"
-                    "su valor \n", 
-                    color="Black", 
-                    size=11, 
-                    no_wrap=False, 
-                )
-        
-    contenedor=ft.Container(content=instrucciones,expand=False)
-        
     page.add(
-        ft.Row(
-            [
-                bttn_vertice,
-                ft.FilledButton(
-                    text="Generar Arista",
-                    bgcolor=ft.Colors.BLUE_50,
-                    color=ft.Colors.BLUE_400,
-                    on_click=presionar_boton_arista), 
-                campo_peso,
-                ft.FilledButton(text="Reiniciar",bgcolor=ft.Colors.BLUE_50,on_click=lambda e : reiniciar()),
-                ft.IconButton(
-                    icon=ft.Icons.DELETE,
-                    icon_color=ft.Colors.RED_500,
-                    icon_size=40,
-                    tooltip="Borrar grafo",
-                    on_click=borrar
-                ), 
-                ft.FilledButton(text="Regresar",bgcolor=ft.Colors.BLUE_50,on_click=go_to_menu), 
-            ]
-        ),
-        ft.Container(width=10,height=25,)
+    ft.Column(
+        [
+            ft.Text("¿Qué es un grafo?", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("¿Cómo se representa un grafo en programación?", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("¿Cuál es la diferencia entre un grafo dirigido y uno no dirigido?", size=20, weight=ft.FontWeight.BOLD)
+        ]
+    ),
 
     )
 
@@ -568,8 +540,7 @@ def screen_main(page : ft.Page):
                         ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : floyd(grafo.matriz_costos())),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
-                        ft.FilledTonalButton(text="Guardar",bgcolor=ft.Colors.INDIGO_500,on_click=bttn_guardar),
-                        ft.FilledTonalButton(text="Cargar",bgcolor=ft.Colors.INDIGO_500,on_click=bttn_cargar),
+                        ft.FilledTonalButton(text="Regresar",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_menu),
                         texto_distancia        
                     ]
                     
@@ -579,6 +550,33 @@ def screen_main(page : ft.Page):
         )
 
     )
+
+    page.update()
+
+    global grafo
+    
+    vertices_contaminados.clear()  # Limpiar la lista de contaminados
+    vertices_no_contaminados.clear()  # Limpiar la lista de no contaminados
+    
+    #dependiendo del nivel saldra el grafo 1 o 2 
+    if nivel == 1: 
+        grafo = cargar_grafo("grafo1", workarea)  # Cargar el grafo desde un archivo aleatorio en el directorio
+    else: 
+        grafo = cargar_grafo("grafo2", workarea)
+    
+    if grafo is None:
+        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"), [ft.TextButton("Aceptar", on_click=lambda e: e.page.close(alert))])
+        page.open(alert)
+        return
+    
+    for vertice in grafo.vertices:
+        vertice.set_on_click(presionar_boton_vertice)
+        workarea.controls.append(vertice.boton)  # Agregar el botón al área de trabajo
+    
+    workarea.update()  # Refrescar el área de trabajo
+
+   
+        
     
 if __name__ == "__main__":
     ft.app(screen_main)

@@ -1,0 +1,1 @@
+ain_screen.screen_main(page)

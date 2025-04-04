@@ -8,7 +8,6 @@ from Piladinamica import pila
 from Piladinamica import pila
 from colalineal import ColaLineal
 from archivos import guardar_grafo, cargar_grafo
-import menu_screen
 import heapq
 
 circulo_activo = False  
@@ -16,17 +15,6 @@ seleccion = []
 vertices_contaminados = []
 vertices_no_contaminados = []
 grafo = Grafo()  # Se crea el grafo con los vértices
-
-def hexa_random (): 
-    while True:
-        #Se genera un numero random
-        num=random.randint(0,16777215)
-        hexa=hex(num)
-        hexa=hexa.replace('0x', '#')
-        
-        # Evitar colores específicos
-        if hexa not in ["#e3f2fd", "#000000"]:  # Ahora los colores tienen '#'
-            return hexa  # Devuelve el color si no está en la lista prohibida
 
 def reiniciar():
     texto_distancia.value = ""
@@ -89,6 +77,16 @@ def recorrido_anchura(event):
 
     print("Recorrido en anchura finalizado.")
     
+def hexa_random (): 
+    while True:
+        #Se genera un numero random
+        num=random.randint(0,16777215)
+        hexa=hex(num)
+        hexa=hexa.replace('0x', '#')
+        
+        # Evitar colores específicos
+        if hexa not in ["#e3f2fd", "#000000"]:  # Ahora los colores tienen '#'
+            return hexa  # Devuelve el color si no está en la lista prohibida 
            
 def recorrido_profundidad(event):
     
@@ -268,8 +266,7 @@ def lt(a : any, b : any) -> bool:
         return a < b 
     
 #Dijsktra  
-def dijkstra(mat_pesos : list, reciclaje: list):
-    vertice_inicial = grafo.vertices.index(seleccion[0])
+def dijkstra(mat_pesos : list, reciclaje: list, vertice_inicial : int):
     cant_vertices = len(mat_pesos)
     s = [vertice_inicial] #Crea un arreglo con el vértice inicial
     d = [None] * cant_vertices #Crea un arreglo de tamaño n 
@@ -295,21 +292,18 @@ def dijkstra(mat_pesos : list, reciclaje: list):
         w = menor_dist
         s.append(w)
 
-    aux=reciclaje[0]
+    aux=0
     for nodo in reciclaje: 
-        if lt(d[nodo],d[aux]): 
+        if nodo!=vertice_inicial and lt(d[nodo],d[aux]): 
             aux=nodo
     indi=aux
-
     while(p[indi] != None): 
         aux=p[indi]
         v1 = grafo.vertices[aux]
         v2 = grafo.vertices[indi]
         arista = grafo.buscar_arista(v1, v2)  # Obtener la arista entre los nodos
         arista.repaint(ft.Colors.AMBER_200) # Resaltar la arista en amarillo
-        indi=aux
 
-#Floyd
 def floyd(mat : list):
     cant_vertices = len(mat)
     a = mat.copy() #Copia la matriz de costos
@@ -329,19 +323,8 @@ def floyd(mat : list):
                 if lt(dist, a[i][j]):  
                     a[i][j] = dist
                     pre[i][j] = pre[k][j]  # Actualiza el predecesor
-                    
-    v_inicial = vertices_contaminados[0]  # Vértice inicial para el recorrido
 
-    for i in vertices_contaminados:
-        if i != v_inicial:
-            #Resaltar el camino más corto
-            nodo_act = i  # Nodo actual
-            while nodo_act != v_inicial:  # Mientras no lleguemos al nodo inicial
-                nodo_pre = pre[v_inicial][nodo_act]  # Predecesor del nodo actual
-                grafo.buscar_arista(grafo.vertices[nodo_pre], grafo.vertices[nodo_act]).repaint(ft.Colors.AMBER_200)  # Resaltar la arista en amarillo
-                nodo_act = nodo_pre  # Actualizar el nodo actual
-            
-            time.sleep(0.5)  # Pausa para visualizar el paso a paso
+    print(pre)
         
 def buscar_componente(v2, componentes):
     for c2 in componentes:
@@ -435,28 +418,22 @@ bttn_vertice =  ft.FilledButton(
 
 def bttn_guardar(e : ft.ControlEvent):
     """Guarda el grafo en un archivo."""
-    guardar_grafo("grafo2", grafo)  # Guardar el grafo en un archivo
+    guardar_grafo("grafo.pkl", grafo)  # Guardar el grafo en un archivo
     
 def bttn_cargar(e : ft.ControlEvent):
     """Carga el grafo desde un archivo."""
     global grafo
     
-    vertices_contaminados.clear()  # Limpiar la lista de contaminados
-    vertices_no_contaminados.clear()  # Limpiar la lista de no contaminados
-    
-    grafo = cargar_grafo("grafo2", workarea)  # Cargar el grafo desde un archivo
+    # Aquí se carga el grafo desde un archivo aleatorio
+    grafo = cargar_grafo(workarea)  # Cargar el grafo desde un archivo aleatorio en el directorio
     
     if grafo is None:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"), [ft.TextButton("Aceptar", on_click=lambda e: e.page.close(alert))])
         e.page.open(alert)
         return
     
     for vertice in grafo.vertices:
         vertice.set_on_click(presionar_boton_vertice)
-        if vertice.contaminado:
-            vertices_contaminados.append(grafo.vertices.index(vertice))  # Guardar el índice del vértice contaminado
-        else:
-            vertices_no_contaminados.append(grafo.vertices.index(vertice))  # Guardar el índice del vértice no contaminado
         workarea.controls.append(vertice.boton)  # Agregar el botón al área de trabajo
     
     workarea.update()  # Refrescar el área de trabajo
@@ -471,11 +448,7 @@ def screen_main(page : ft.Page):
     page.bgcolor = ft.Colors.WHITE
     page.window.resizable = False
 
-    def go_to_menu(e): 
-        page.clean()
-        menu_screen.screen_menu(page)
         
-    
     def on_tap_down(event: ft.TapEvent):
         """Coloca círculos si el modo está activado y el clic no fue en el botón."""
         if not circulo_activo:
@@ -507,12 +480,11 @@ def screen_main(page : ft.Page):
         page.update()  # Actualizar la pantalla
 
     instrucciones = ft.Text(
-                    "Aqui puede diseñar su propio mapa \n"
-                    "Presione el boton vertice para agregar\n" 
-                    "una zona\n"
-                    "En la seccion generar arista puede\n" 
-                    "agregar un camino asi como \n"
-                    "su valor \n", 
+                    "Para que el algoritmo Prim muestre un\n"
+                    "MST debe seleccionar el nodo inicial\n"
+                    "El algoritmo de Kruscal muestra\n"
+                    "encuentra el MST comenzando por la\n"
+                    "arista de menor peso en el grafo\n",
                     color="Black", 
                     size=11, 
                     no_wrap=False, 
@@ -521,28 +493,14 @@ def screen_main(page : ft.Page):
     contenedor=ft.Container(content=instrucciones,expand=False)
         
     page.add(
-        ft.Row(
-            [
-                bttn_vertice,
-                ft.FilledButton(
-                    text="Generar Arista",
-                    bgcolor=ft.Colors.BLUE_50,
-                    color=ft.Colors.BLUE_400,
-                    on_click=presionar_boton_arista), 
-                campo_peso,
-                ft.FilledButton(text="Reiniciar",bgcolor=ft.Colors.BLUE_50,on_click=lambda e : reiniciar()),
-                ft.IconButton(
-                    icon=ft.Icons.DELETE,
-                    icon_color=ft.Colors.RED_500,
-                    icon_size=40,
-                    tooltip="Borrar grafo",
-                    on_click=borrar
-                ), 
-                ft.FilledButton(text="Regresar",bgcolor=ft.Colors.BLUE_50,on_click=go_to_menu), 
-            ]
-        ),
-        ft.Container(width=10,height=25,)
-
+    ft.Column(
+        [
+            ft.Text("¿Qué es un grafo?", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("¿Cómo se representa un grafo en programación?", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("¿Cuál es la diferencia entre un grafo dirigido y uno no dirigido?", size=20, weight=ft.FontWeight.BOLD)
+        ]
+    ),
+    ft.Container(width=10, height=25)
     )
 
     page.add(
@@ -564,11 +522,10 @@ def screen_main(page : ft.Page):
                         ft.Text("Ejecutar Algoritmo",color="BLACK"), 
                         ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
                         ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
-                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(grafo.matriz_costos(),vertices_contaminados)),
+                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(grafo.matriz_costos(),[0,1],2)),
                         ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : floyd(grafo.matriz_costos())),
                         ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
                         ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
-                        ft.FilledTonalButton(text="Guardar",bgcolor=ft.Colors.INDIGO_500,on_click=bttn_guardar),
                         ft.FilledTonalButton(text="Cargar",bgcolor=ft.Colors.INDIGO_500,on_click=bttn_cargar),
                         texto_distancia        
                     ]
