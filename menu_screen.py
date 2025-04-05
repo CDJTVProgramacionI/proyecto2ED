@@ -39,7 +39,6 @@ def screen_menu(page: ft.Page):
         disabled=True,
         check_color="#697A55",
         fill_color="#CADBB7" if etapa1_completa else "#cccccc")
-    checkbox4= ft.Checkbox(value=False, disabled=True,check_color="#697A55") 
 
     def go_to_et_1(e): 
         page.clean()
@@ -99,7 +98,7 @@ def screen_menu(page: ft.Page):
                     ft.FilledButton(text="Mapa libre", bgcolor='#CADBB7', color='#485935', width=180,height=65,on_click=go_to_main),
                 ], alignment=ft.MainAxisAlignment.CENTER),
                 ft.Text(" "), 
-                ft.FilledButton(text="Certificado", bgcolor='#CADBB7', color='#485935', width=180,height=60,on_click=go_to_nombre),
+                ft.FilledButton(text="Certificado", bgcolor='#CADBB7', color='#485935', width=180,height=60,on_click=go_to_nombre, visible=etapa1_completa and etapa2_completa and etapa3_completa),
                 gif, 
             ],
             alignment=ft.MainAxisAlignment.CENTER,  # Alinear el contenido al centro
