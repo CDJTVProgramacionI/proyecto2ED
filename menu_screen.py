@@ -3,10 +3,8 @@ import main_screen
 import screen_nombre
 import instrucc_screen
 import main_et_1
+import main_et_2
 import flet.canvas as cv
-
-#def main(page: ft.Page):  
-#   screen_menu(page,False,False,False,False)
 
 def screen_menu(page: ft.Page):
     page.title = "Visual Graph"
@@ -24,24 +22,33 @@ def screen_menu(page: ft.Page):
 
     #Definimos checkbox para cada boton en caso de terminar el nivel 
     etapa1_completa = page.session.get("etapa1_terminada") == True
-
+    etapa2_completa = page.session.get("etapa2_terminada") == True
+    etapa3_completa = page.session.get("etapa3_terminada") == True
     # Checkbox para etapa 1
     checkbox1 = ft.Checkbox(
         value=etapa1_completa,
         disabled=True,
         check_color="#697A55",
         fill_color="#CADBB7" if etapa1_completa else "#cccccc")
-    checkbox2= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
-    checkbox3= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
+    checkbox2 = ft.Checkbox(
+        value=etapa2_completa,
+        disabled=True,
+        check_color="#697A55",
+        fill_color="#CADBB7" if etapa1_completa else "#cccccc")
+    checkbox3 = ft.Checkbox(
+        value=etapa3_completa,
+        disabled=True,
+        check_color="#697A55",
+        fill_color="#CADBB7" if etapa1_completa else "#cccccc")
     checkbox4= ft.Checkbox(value=False, disabled=True,check_color="#697A55") 
 
     def go_to_et_1(e): 
         page.clean()
-        main_et_1.screen_main(page,1)
+        main_et_1.screen_main(page,1,"etapa2")
         
     def go_to_et_2(e): 
         page.clean()
-        main_et_1.screen_main(page,2)
+        main_et_1.screen_main(page,1,"etapa3")
 
     def go_to_main(e): 
         page.clean()
@@ -56,6 +63,13 @@ def screen_menu(page: ft.Page):
         cb1=True
         page.clean()
         instrucc_screen.screen_instrucciones(page)
+    
+    def completar_nivel(e):
+        import time
+        time.sleep(1)  #Pasar la funcion que valida el nivel 
+        checkbox1.value = True
+        page.update()
+        page.session["etapa1_terminada"] = True  # Guardar el estado de la etapa en la sesión
 
     content_container = ft.Container(
         content=ft.Column(
@@ -75,12 +89,12 @@ def screen_menu(page: ft.Page):
                     checkbox1,
                 ], alignment=ft.MainAxisAlignment.CENTER), 
                 ft.Row([
-                    ft.FilledButton(text="Etapa 2", bgcolor='#CADBB7', color='#485935', width=180,height=65,on_click=go_to_et_1),
-                    checkbox2,
+                    ft.FilledButton("Etapa 2", bgcolor='#CADBB7', color='#485935', width=180, height=65, on_click=go_to_et_1),
+                    checkbox2
                 ], alignment=ft.MainAxisAlignment.CENTER),
                 ft.Row([
-                    ft.FilledButton(text="Etapa 3", bgcolor='#CADBB7', color='#485935', width=180,height=65,on_click=go_to_et_2),
-                    checkbox3,
+                    ft.FilledButton("Etapa 3", bgcolor='#CADBB7', color='#485935', width=180, height=65, on_click=go_to_et_2),
+                    checkbox3
                 ], alignment=ft.MainAxisAlignment.CENTER),
                 ft.Row([
                     ft.FilledButton(text="Mapa libre", bgcolor='#CADBB7', color='#485935', width=180,height=65,on_click=go_to_main),

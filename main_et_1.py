@@ -16,25 +16,27 @@ seleccion = []
 vertices_contaminados = []
 vertices_no_contaminados = []
 grafo = Grafo()  # Se crea el grafo con los vértices
+respuestas_correctas_etapa2 = {
+    1: "Recorrido Anchura",
+    2: "Algoritmo Dijkstra",
+    3: "Algoritmo Prim"
+
+}
+
+respuestas_correctas_etapa3 = {
+    1: "Recorrido Profundidad",
+    2: "Algoritmo Floyd",
+    3: "Algoritmo Kruskal"
+}
+
+
 
 def reiniciar():
     texto_distancia.value = ""
     for arista in grafo.aristas:
         arista.repaint("black")
 
-def borrar(e : ft.ControlEvent):
-    grafo.borrar()
-    seleccion.clear()
-    workarea.controls = [grafo.canvas]
-    workarea.update()
-
 def recorrido_anchura(event):
-    
-    if len(seleccion) == 0:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar un nodo inicial"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        event.page.open(alert)
-        return
-    
     # Reiniciar estados de los vértices
     for vertice in grafo.vertices:
         vertice.setEstado(0)  # Estado 0: En espera
@@ -43,7 +45,7 @@ def recorrido_anchura(event):
     cola = ColaLineal()
     
     # Obtener el índice del vértice inicial de la selección
-    nodo_inicial = seleccion[0]  # Seleccionar el primer nodo de la lista de selección
+    nodo_inicial = grafo.vertices[0]  # Seleccionar el primer nodo de la lista
 
     # Iniciar el BFS
     if nodo_inicial.estaEnEspera():
@@ -89,13 +91,7 @@ def hexa_random ():
         if hexa not in ["#e3f2fd", "#000000"]:  # Ahora los colores tienen '#'
             return hexa  # Devuelve el color si no está en la lista prohibida 
            
-def recorrido_profundidad(event):
-    
-    if len(seleccion) == 0:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar un nodo inicial"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        event.page.open(alert)
-        return
-    
+def recorrido_profundidad(event):  
     # Reiniciar estados de los vértices
     for vertice in grafo.vertices:
         vertice.setEstado(0)  # Estado 0: En espera
@@ -104,7 +100,7 @@ def recorrido_profundidad(event):
     stack = pila()
     
     # Obtener el nodo inicial de la selección
-    nodo_inicial = seleccion[0]  # Seleccionar el primer nodo de la lista de selección
+    nodo_inicial = grafo.vertices[0]  # Seleccionar el primer nodo de la lista de selección
     
     # Iniciar DFS desde el nodo inicial
     nodo_inicial.setEstado(1)  # Estado 1: En proceso
@@ -142,48 +138,15 @@ def recorrido_profundidad(event):
                 time.sleep(0.5)  # Pausa para visualizar cada paso
 
     print("Recorrido en profundidad finalizado.")
-    
-def determinar_bosque():
-        #Determinar si el bosque es denso o disperso
-        num_vertices = len(grafo.vertices)  # Número de vértices en el grafo
-        num_aristas = len(grafo.aristas)  # Número de aristas en el grafo
-        #numero maximo de conexiones en un grafo completo
-        max_conexiones = num_vertices * (num_vertices - 1) // 2  # Máximo de aristas en un grafo completo
-        #numero minimo de conexiones en un grafo completo
-        min_conexiones = num_vertices - 1  # Mínimo de aristas para un árbol
-
-        #Calcular si el numero de caminos esta mas cerca del maximo o del minimo
-        if abs (num_aristas - max_conexiones) < abs(num_aristas - min_conexiones):
-            return "Denso" 
-        else:
-            return "Disperso"
-        
-def ejecutar_prim_o_kruskal(event):
-    # Determinar el tipo de bosque (denso o disperso)
-    tipo_bosque = determinar_bosque()
-    
-    if tipo_bosque == "Denso":
-        texto_distancia.value = "El bosque es denso, se ejecutará Prim."
-        texto_distancia.update()
-        act_prim(event)  # Ejecutar Prim si el bosque es denso
-    else: 
-        texto_distancia.value = "El bosque es disperso, se ejecutará kruskal."
-        texto_distancia.update()
-        act_kruskal(event)  # Ejecutar Kruskal si el bosque es disperso
 
 def act_prim(event):
-    if len(seleccion) == 0:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar un nodo inicial"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        event.page.open(alert)
-        return
-    
     peso_total= 0
     mst = []  # Lista para almacenar el árbol de expansión mínima (MST)
     aristas = grafo.aristas.copy()  # Copia de la lista de aristas
-    aristas.sort(key=lambda x: x.peso)  # Ordena las aristas por peso
+    aristas.sort(key=lambda x: x.peso)  # Ordena las aristas por pesos
     visitados = [False] * len(grafo.vertices)  # Lista para marcar los vértices visitados
     min_heap = []  # Cola de prioridad para seleccionar la arista de menor peso
-    vertice_inicial = grafo.vertices.index(seleccion[0] ) # Vértice inicial para comenzar el algoritmo
+    vertice_inicial = 0 # Vértice inicial para comenzar el algoritmo
 
     def agregar_aristas(v):
         visitados[v] = True  # Marca el vértice como visitado
@@ -268,7 +231,7 @@ def lt(a : any, b : any) -> bool:
     
 #Dijsktra  
 def dijkstra(mat_pesos : list, reciclaje: list):
-    vertice_inicial = grafo.vertices.index(seleccion[0])
+    vertice_inicial = 0
     cant_vertices = len(mat_pesos)
     s = [vertice_inicial] #Crea un arreglo con el vértice inicial
     d = [None] * cant_vertices #Crea un arreglo de tamaño n 
@@ -308,7 +271,6 @@ def dijkstra(mat_pesos : list, reciclaje: list):
         arista.repaint(ft.Colors.AMBER_200) # Resaltar la arista en amarillo
         indi=aux
 
-#Floyd 
 def floyd(mat : list):
     cant_vertices = len(mat)
     a = mat.copy() #Copia la matriz de costos
@@ -346,52 +308,7 @@ def buscar_componente(v2, componentes):
     for c2 in componentes:
         if v2 in c2:
             return c2
-            
-def activar_circulos(event):
-    """Activa o desactiva la colocación de círculos al hacer clic en el botón."""
-    global circulo_activo
-    circulo_activo = not circulo_activo
 
-    # Cambiar color del botón según el estado
-    bttn_vertice.bgcolor = ft.Colors.GREEN_ACCENT_100 if circulo_activo else ft.Colors.PINK_100
-    bttn_vertice.update()  # Refrescar solo cuando se cambia el estado
-
-def presionar_boton_arista(e : ft.ControlEvent):
-    
-    #Validaciones
-    if campo_peso.value.replace(" ","") == "":
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe ingresar un peso"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        e.page.open(alert)
-        return
-    
-    if not campo_peso.value.isnumeric():
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("El peso debe ser un número positivo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        e.page.open(alert)
-        return
-    
-    if len(seleccion) != 2:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("Debe seleccionar dos vértices"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        e.page.open(alert)
-        return
-    
-    v1 = seleccion[0] #Primer vértice
-    v2 = seleccion[1] #Segundo vértice
-
-    peso = campo_peso.value  # Peso de la arista
-
-    grafo.agregar_arista(v1, v2, int(peso))  # Agregar la conexión en la lista de adyacencia
-
-    #Limpia la selección
-    seleccion[0].boton.content.bgcolor = seleccion[0].color
-    seleccion[0].boton.content.update()
-    seleccion[1].boton.content.bgcolor = seleccion[1].color
-    seleccion[1].boton.content.update()
-    seleccion.clear()
-    
-    #Limpia el campo de peso
-    campo_peso.value = ""
-    campo_peso.update()
-    
 def presionar_boton_vertice(e : ft.ControlEvent):
     nodo = grafo.buscar_vertice(e.control.data)  # Obtener el nodo correspondiente al botón
     if nodo in seleccion:
@@ -424,30 +341,266 @@ workarea = ft.Stack(width=650, height=525, controls=[grafo.canvas])
 campo_peso = ft.TextField(label="Peso", width=70, height=40, color=ft.Colors.BLUE_400)
 texto_distancia = ft.Text("", size=11, color="BLACK")
 
-# Botón rectangular para activar/desactivar colocación de círculos
-bttn_vertice =  ft.FilledButton(
-    width=100, height=50,
-    bgcolor=ft.Colors.PINK_100,  # Color inicial del botón
-    text="VÉRTICES",
-    on_click=activar_circulos  # Alternar modo de colocación al hacer clic
-)
-
-def bttn_guardar(e : ft.ControlEvent):
-    """Guarda el grafo en un archivo."""
-    guardar_grafo("grafo2", grafo)  # Guardar el grafo en un archivo
+def screen_main(page : ft.Page,  i=1, etapa="etapa2"):
     
-def bttn_cargar(e : ft.ControlEvent):
-    """Carga el grafo desde un archivo."""
+    page.title = "Visual Graph"
+    page.vertical_alignment = ft.MainAxisAlignment.END
+
+    page.window.width = 900
+    page.window.height = 700
+    page.bgcolor = ft.Colors.WHITE
+    page.window.resizable = False
+    
+    def actualiza_pregunta(j, etapa):
+        
+        if etapa == "etapa2":
+            if j == 1: 
+               nom_desafio.content =  ft.Text(
+                "1.	Desafío:  Indique cuál algoritmo utilizaría para encontrar la zona contaminada más cercana desde V1.",
+                size=14, 
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER,
+                no_wrap=False 
+                )
+            elif j == 2:
+               nom_desafio.content =  ft.Text(
+                "2.	Desafío: Seleccione cuál de los siguientes métodos usaría para encontrar la ruta más corta para transportar los residuos a los centros de reciclaje.",
+                size=14, 
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER,
+                no_wrap=False 
+                )
+            elif j == 3: 
+                nom_desafio.content= ft.Text(
+                "3.	Si es un bosque denso, ¿qué algoritmo utilizarías?",
+                size=14, 
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER,
+                no_wrap=False 
+            )      
+        elif etapa == "etapa3":
+            if j == 1: 
+                nom_desafio.content = ft.Text(
+                "1.	Desafío: Indique cuál algoritmo utilizaría para encontrar la zona contaminada más lejana desde V1.",
+                size=16, 
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER,
+                no_wrap=False 
+                )
+            elif j == 2:
+                nom_desafio.content = ft.Text(
+                "2.	Desafío: Seleccione cuál de los siguientes métodos usaría para encontrar la ruta más corta para transportar los residuos a los centros de reciclaje.",
+                size=16, 
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER,
+                no_wrap=False 
+                )
+            elif j == 3: 
+                nom_desafio.content =  ft.Text(
+                "3. Si es un bosque disperso, ¿qué algoritmo utilizarías?",
+                size=16, 
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER,
+                no_wrap=False 
+                )
+        page.update()
+    
+   
+    def go_to_menu(e):
+        # Guardar que la etapa 2 fue completada
+        etapa_terminada = "etapa2_terminada" if etapa == "etapa2" else "etapa3_terminada"
+        page.session.set(etapa_terminada, True)
+        page.clean()
+        menu_screen.screen_menu(page)  # Regresar al menú
+
+    def go_to_validar(e):
+        nonlocal i
+        validar_respuesta(e,i)
+        page.update()
+    
+
+    def next_instruction(e):
+        nonlocal i
+        if i < 3:
+            i += 1
+            actualiza_pregunta(i, etapa)
+        boton_siguiente.visible = False
+        reiniciar()
+        page.update()
+  
+    def prev_instruction(e):
+        nonlocal i
+        if i > 1:
+            i -= 1
+            actualiza_pregunta(i, etapa)
+        page.update()
+    
+    # Crear componentes que se actualizarán
+    nom_desafio = ft.Container(
+        width=900,
+        height=60,
+        bgcolor="#b5cb59",  # Color de fondo del recuadro
+        padding=6,  # Espacio dentro del recuadro
+        border=ft.border.all(1, "black"),  # Borde negro de 2px
+        border_radius=10,  # Bordes redondeados
+        alignment=ft.alignment.center  # Centrar el texto dentro del recuadro
+    )
+    
+    
+    done=True
+    boton_siguiente = ft.ElevatedButton("Siguiente", on_click=next_instruction, bgcolor="#b5cb59", color="white")
+    boton_terminar = ft.FilledButton("Terminar", bgcolor="#b5cb59", color="white", on_click=go_to_menu)
+
+    boton_siguiente.visible = False
+    boton_terminar.visible = False
+    def validar_respuesta(e,i):
+        if etapa == "etapa2":
+            if e.control.text == respuestas_correctas_etapa2[i]:
+                alert = ft.AlertDialog(True, ft.Text("Correcto"), ft.Text("Felicidades!"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+                e.page.open(alert)
+                if i == 1:
+                    boton_siguiente.visible = True
+                    boton_terminar.visible = False
+                    recorrido_anchura(e)
+                elif i == 3:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = True
+                    act_prim(e)
+                elif i==2:
+                    boton_siguiente.visible = True
+                    boton_terminar.visible = False
+                    dijkstra(grafo.matriz_costos(), vertices_contaminados)  # Llamar a Dijkstra con la matriz de pesos y los nodos reciclables
+            else:
+                alert = ft.AlertDialog(True, ft.Text("Incorrecto"), ft.Text("Intenta de nuevo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+                e.page.open(alert)
+                if i == 1:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = False
+                elif i == 3:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = False
+                elif i==2:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = False
+        elif etapa == "etapa3":
+            if e.control.text == respuestas_correctas_etapa3[i]:
+                alert = ft.AlertDialog(True, ft.Text("Correcto"), ft.Text("Felicidades!"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+                e.page.open(alert)
+                if i == 1:
+                    boton_siguiente.visible = True
+                    boton_terminar.visible = False
+                    recorrido_profundidad(e)
+                    print("Ejecutando profundidad")
+                elif i==2:
+                    boton_siguiente.visible = True
+                    boton_terminar.visible = False
+                    floyd(grafo.matriz_costos())
+                elif i == 3:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = True
+                    act_kruskal(e)
+                
+                    
+                # Después de cualquier cambio de visibilidad:
+                boton_siguiente.update()
+                boton_terminar.update()
+                    
+            else:
+                alert = ft.AlertDialog(True, ft.Text("Incorrecto"), ft.Text("Intenta de nuevo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
+                e.page.open(alert)
+                if i == 1:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = False
+                elif i == 3:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = False
+                elif i==2:
+                    boton_siguiente.visible = False
+                    boton_terminar.visible = False
+        
+    actualiza_pregunta(i,etapa)
+    
+    
+    instrucciones = ft.Text(
+                    "Carga el grafo a tu elección o dibuja uno \n"
+                    "y por cada pregunta elige el botón \n"
+                    "correcto.",
+                    color="Black", 
+                    size=11, 
+                    no_wrap=False, 
+                )
+        
+    contenedor=ft.Container(content=instrucciones,expand=False)
+        
+    # Agregarlos a una fila (uno al lado del otro)
+    fila_botones = ft.Row(
+        controls=[
+            boton_siguiente,
+            boton_terminar],
+        alignment=ft.MainAxisAlignment.CENTER  # Opcional, para centrar los botones
+    )
+
+
+   
+    page.add(
+    ft.Column(
+        [   
+            nom_desafio,
+            fila_botones
+        ]
+        ),
+    ft.Container(width=10, height=0)
+    )
+
+    page.add(
+        ft.Row(
+            [
+                ft.Container(
+                    bgcolor=ft.Colors.BLUE_50,
+                    width=650,
+                    height=525,
+                    content=workarea
+                ), 
+
+                ft.Column(
+                    [
+                        
+                        ft.Text("Instrucciones",size=20,bgcolor=ft.Colors.INDIGO_100,weight=ft.FontWeight.BOLD,italic=True), 
+                        contenedor, 
+                        ft.Text("Ejecutar Algoritmo",color="BLACK"), 
+                        ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_validar),
+                        ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_validar), 
+                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_validar),
+                        ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_validar),
+                        ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_validar),
+                        ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_validar),
+                        texto_distancia
+                    ]
+                    
+                )
+            ]
+        
+        )
+
+    )
+
+    page.update()
+    page.update()
+
     global grafo
     
     vertices_contaminados.clear()  # Limpiar la lista de contaminados
     vertices_no_contaminados.clear()  # Limpiar la lista de no contaminados
     
-    grafo = cargar_grafo("grafo.pkl", workarea)  # Cargar el grafo desde un archivo
+    #dependiendo del nivel saldra el grafo 1 o 2 
+    if etapa == "etapa2": 
+        grafo = cargar_grafo("grafo1", workarea)  # Cargar el grafo desde un archivo aleatorio en el directorio
+    else: 
+        grafo = cargar_grafo("grafo2", workarea)
     
     if grafo is None:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"),[ft.TextButton("Aceptar",on_click=lambda e: e.page.close(alert))])
-        e.page.open(alert)
+        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"), [ft.TextButton("Aceptar", on_click=lambda e: e.page.close(alert))])
+        page.open(alert)
         return
     
     for vertice in grafo.vertices:
@@ -460,123 +613,7 @@ def bttn_cargar(e : ft.ControlEvent):
     
     workarea.update()  # Refrescar el área de trabajo
 
-def screen_main(page : ft.Page, nivel:int):
-
-    contenedor=ft.Container(width=10,height=25,)
-
-    def go_to_menu(e): 
-        page.clean()
-        menu_screen.screen_menu(page)
-    
-    page.title = "Visual Graph"
-    page.vertical_alignment = ft.MainAxisAlignment.END
-
-    page.window.width = 900
-    page.window.height = 700
-    page.bgcolor = ft.Colors.WHITE
-    page.window.resizable = False
-
-    def on_tap_down(event: ft.TapEvent):
-        """Coloca círculos si el modo está activado y el clic no fue en el botón."""
-        if not circulo_activo:
-            return  # No hacer nada si el modo no está activado
-
-        x = event.local_x  # Obtener coordenadas del clic
-        y = event.local_y  # Obtener coordenadas del clic
-    
-        print(f"Círculo colocado en las coordenadas: {x}, {y}")
-        
-        # Asignar aleatoriamente si es contaminado o no
-        contaminado = random.choice([True, False])
-        
-        #Agregar un nuevo vértice al grafo
-        nodo = grafo.agregar_vertice(contaminado) 
-        nodo.set_on_click(presionar_boton_vertice)  # Asignar la función al evento de clic
-        nodo.boton.top = y - 25  # Ajustar la posición del botón vértice
-        nodo.boton.left = x - 25  # Ajustar la posición del botón vértice
-        workarea.controls.append(nodo.boton)  # Agregar el botón al área de trabajo
-        workarea.update()  # Actualizar el área de trabajo para mostrar el nuevo vértice
-        
-        # Guardar el índice del vértice en la lista correspondiente
-        if contaminado:
-            vertices_contaminados.append(len(grafo.vertices) - 1)
-        else:
-            vertices_no_contaminados.append(len(grafo.vertices) - 1)
-
-        
-        page.update()  # Actualizar la pantalla
-
-    page.add(
-    ft.Column(
-        [
-            ft.Text("¿Qué es un grafo?", size=20, weight=ft.FontWeight.BOLD),
-            ft.Text("¿Cómo se representa un grafo en programación?", size=20, weight=ft.FontWeight.BOLD),
-            ft.Text("¿Cuál es la diferencia entre un grafo dirigido y uno no dirigido?", size=20, weight=ft.FontWeight.BOLD)
-        ]
-    ),
-
-    )
-
-    page.add(
-        ft.Row(
-            [
-                ft.Container(
-                    bgcolor=ft.Colors.BLUE_50,
-                    width=650,
-                    height=525,
-                    content=workarea,
-                    on_tap_down=on_tap_down
-                ), 
-
-                ft.Column(
-                    [
-
-                        ft.Text("Instrucciones",size=20,bgcolor=ft.Colors.INDIGO_100,weight=ft.FontWeight.BOLD,italic=True), 
-                        contenedor, 
-                        ft.Text("Ejecutar Algoritmo",color="BLACK"), 
-                        ft.FilledTonalButton(text="Algoritmo Kruskal",bgcolor=ft.Colors.INDIGO_500,on_click=act_kruskal),
-                        ft.FilledTonalButton(text="Algoritmo Prim",bgcolor=ft.Colors.INDIGO_500,on_click=act_prim), 
-                        ft.FilledTonalButton(text="Algoritmo Dijkstra",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : dijkstra(grafo.matriz_costos(),vertices_contaminados)),
-                        ft.FilledTonalButton(text="Algoritmo Floyd",bgcolor=ft.Colors.INDIGO_500,on_click=lambda e : floyd(grafo.matriz_costos())),
-                        ft.FilledTonalButton(text="Recorrido Anchura",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_anchura),
-                        ft.FilledTonalButton(text="Recorrido Profundidad",bgcolor=ft.Colors.INDIGO_500,on_click=recorrido_profundidad),
-                        ft.FilledTonalButton(text="Regresar",bgcolor=ft.Colors.INDIGO_500,on_click=go_to_menu),
-                        texto_distancia        
-                    ]
-                    
-                )
-            ]
-        
-        )
-
-    )
-
-    page.update()
-
-    global grafo
-    
-    vertices_contaminados.clear()  # Limpiar la lista de contaminados
-    vertices_no_contaminados.clear()  # Limpiar la lista de no contaminados
-    
-    #dependiendo del nivel saldra el grafo 1 o 2 
-    if nivel == 1: 
-        grafo = cargar_grafo("grafo1", workarea)  # Cargar el grafo desde un archivo aleatorio en el directorio
-    else: 
-        grafo = cargar_grafo("grafo2", workarea)
-    
-    if grafo is None:
-        alert = ft.AlertDialog(True, ft.Text("Error"), ft.Text("No se pudo cargar el grafo"), [ft.TextButton("Aceptar", on_click=lambda e: e.page.close(alert))])
-        page.open(alert)
-        return
-    
-    for vertice in grafo.vertices:
-        vertice.set_on_click(presionar_boton_vertice)
-        workarea.controls.append(vertice.boton)  # Agregar el botón al área de trabajo
-    
-    workarea.update()  # Refrescar el área de trabajo
-
    
-        
     
 if __name__ == "__main__":
     ft.app(screen_main)
