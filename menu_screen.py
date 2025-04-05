@@ -23,7 +23,14 @@ def screen_menu(page: ft.Page):
     )
 
     #Definimos checkbox para cada boton en caso de terminar el nivel 
-    checkbox1= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
+    etapa1_completa = page.session.get("etapa1_terminada") == True
+
+    # Checkbox para etapa 1
+    checkbox1 = ft.Checkbox(
+        value=etapa1_completa,
+        disabled=True,
+        check_color="#697A55",
+        fill_color="#CADBB7" if etapa1_completa else "#cccccc")
     checkbox2= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
     checkbox3= ft.Checkbox(value=False, disabled=True,check_color="#697A55")
     checkbox4= ft.Checkbox(value=False, disabled=True,check_color="#697A55") 

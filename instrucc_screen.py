@@ -87,11 +87,12 @@ def screen_instrucciones(page: ft.Page, i=1):
             boton_terminar.visible = False
             
         page.update()
-    
+        
     def go_to_menu(e):
-        menu_screen.cb1=True
+        # Guardar que la etapa 1 fue completada
+        page.session.set("etapa1_terminada", True)
         page.clean()
-        menu_screen.screen_menu(page)
+        menu_screen.screen_menu(page)  # Regresar al menú
        
     def next_instruction(e):
         nonlocal i
