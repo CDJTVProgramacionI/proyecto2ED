@@ -3,7 +3,6 @@ import main_screen
 import screen_nombre
 import instrucc_screen
 import main_et_1
-import main_et_2
 import flet.canvas as cv
 
 def screen_menu(page: ft.Page):
