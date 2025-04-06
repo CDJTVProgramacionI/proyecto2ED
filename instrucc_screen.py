@@ -87,10 +87,41 @@ def screen_instrucciones(page: ft.Page, i=1):
             boton_terminar.visible = False
             
         page.update()
-    
+
+    audio1 = ft.Audio(
+        src=r"C:\Users\Viridiana\Downloads\proyecto2ED-version2_21\desafios.mp3",
+        autoplay=False,
+    )
+    page.overlay.append(audio1)
+
+    is_playing = ft.Ref[bool]()
+    is_playing.current = False
+
+    play_pause_button = ft.ElevatedButton(
+        text=".",
+        icon=ft.icons.PLAY_ARROW,
+    )
+
+    def toggle_audio(e):
+        if is_playing.current:
+            audio1.pause()
+            play_pause_button.icon = ft.icons.PLAY_ARROW
+        else:
+            audio1.play()
+            play_pause_button.icon = ft.icons.PAUSE
+        is_playing.current = not is_playing.current
+        page.update()
+
+    play_pause_button.on_click = toggle_audio
+
     def go_to_menu(e):
+        if is_playing.current:
+            audio1.pause()  # Detenemos el audio
+        # Guardar que la etapa 2 fue completada
+        # Guardar que la etapa 1 fue completada
+        page.session.set("etapa1_terminada", True)
         page.clean()
-        menu_screen.screen_menu(page)
+        menu_screen.screen_menu(page)  # Regresar al menú
        
     def next_instruction(e):
         nonlocal i
@@ -145,6 +176,13 @@ def screen_instrucciones(page: ft.Page, i=1):
         spacing=20
     )
     
+    page.add(
+        ft.Column(
+            controls=[
+                play_pause_button
+            ],
+        )
+    )
     
     actualiza_instructions(i)
     
