@@ -98,8 +98,11 @@ def screen_instrucciones(page: ft.Page, i=1):
     is_playing.current = False
 
     play_pause_button = ft.ElevatedButton(
-        text=".",
+        text=" ",
         icon=ft.icons.PLAY_ARROW,
+        bgcolor='#CADBB7', 
+        color='#485935', 
+        height=10, 
     )
 
     def toggle_audio(e):

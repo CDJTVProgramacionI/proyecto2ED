@@ -14,8 +14,8 @@ def screen_menu(page: ft.Page):
 
     gif=ft.Image(
         src="https://img1.picmix.com/output/stamp/normal/1/1/1/2/1472111_5d9ae.gif",
-        width=900,
-        height=700, 
+        width=200,
+        height=280, 
         fit=ft.ImageFit.COVER
     )
 
@@ -39,6 +39,13 @@ def screen_menu(page: ft.Page):
         disabled=True,
         check_color="#697A55",
         fill_color="#CADBB7" if etapa1_completa else "#cccccc")
+    
+    tree=ft.Image(
+        src="https://openclipart.org/image/2400px/svg_to_png/215526/PixelTree.png", 
+        width=200, 
+        height=280, 
+        fit=ft.ImageFit.COVER
+    )
 
     def go_to_et_1(e): 
         if is_playing.current:
@@ -79,6 +86,12 @@ def screen_menu(page: ft.Page):
         page.update()
         page.session["etapa1_terminada"] = True  # Guardar el estado de la etapa en la sesión
 
+    image_container= ft.Container(
+        content=tree, 
+        alignment=ft.alignment.center,  # Asegura el centrado
+        expand=True,
+    )
+
 
     audio1 = ft.Audio(
         src=r"C:\Users\Viridiana\Downloads\proyecto2ED-version2_21\menu.mp3",  # La ruta al archivo local
@@ -90,8 +103,10 @@ def screen_menu(page: ft.Page):
     is_playing.current = False
 
     play_pause_button = ft.ElevatedButton(
-        text=".",
         icon=ft.icons.PLAY_ARROW,
+        text=" ", 
+        bgcolor='#CADBB7', 
+        color='#485935' 
     )
 
     def toggle_audio(e):
@@ -153,9 +168,9 @@ def screen_menu(page: ft.Page):
         padding=20,
     )
 
-    column1 = ft.Column([], expand=True,)
+    column1 = ft.Column([image_container], alignment=ft.MainAxisAlignment.CENTER,expand=True,)
     column2 = ft.Column([content_container], alignment=ft.MainAxisAlignment.CENTER, expand=1)
-    column3 = ft.Column([], expand=True)
+    column3 = ft.Column([image_container], alignment=ft.MainAxisAlignment.CENTER,expand=True)
 
     # Agregar el diseño a la página
     page.add(
